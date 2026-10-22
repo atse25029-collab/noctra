@@ -24,6 +24,7 @@ lofty = "0.25"
 tauri-plugin-dialog = "2"
 percent-encoding = "2"
 http = "1"
+tiny_http = "0.12.0"
 
 [target.'cfg(windows)'.dependencies]
 # Native taskbar thumbnail toolbar. Version pinned to what Tauri already resolves, so no second

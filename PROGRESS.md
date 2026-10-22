@@ -3170,6 +3170,28 @@ volume, which is the gesture's correct meaning and the thing my removal made roo
 `Lyrics.svelte`, `reelFollow.ts` and `romanize`/`lyrics` edits are deliberately out of my commit, since
 that handler depends on their uncommitted module.
 
+### D-095 — Mobile Remote Control & Android APK Companion App
+
+Added full mobile remote control capabilities to allow controlling Noctra on Windows from an Android phone:
+
+1. **Rust LAN Remote Server & Zero-Config UDP Discovery:**
+   - Background HTTP server on port `43821` powered by `tiny_http` (lightweight, zero bloated async dependencies).
+   - Endpoints for status (`/api/status`), real-time state long-polling (`/api/wait_state`), commands (`/api/command`), cover artwork streaming (`/api/artwork`), and synced lyrics (`/api/lyrics`).
+   - Also serves an embedded, responsive mobile web controller at `/` for instant access from any phone/browser on the local network.
+   - UDP discovery listener on port `43822` (`NOCTRA_DISCOVER` -> `NOCTRA_SERVER:43821:Noctra`) enabling instant auto-detection without manual IP typing.
+
+2. **Frontend Wiring (`remoteBridge.ts`):**
+   - Synchronizes playback progress, track metadata, extracted album art, accent color, favorite status, and synced lyrics to the remote server.
+   - Listens for remote commands (`toggle`, `play`, `pause`, `next`, `prev`, `seek`, `vol`, `mute`, `favorite`).
+   - Added Mobile Remote Control status and IP view to `Settings.svelte`.
+
+3. **Android Flutter App (`remote/`):**
+   - High-fidelity Android application mirroring Noctra's dark glassmorphism aesthetic.
+   - Dynamic accent glow matching the playing album cover.
+   - Real-time scrubbing, favorite heart, volume slider, auto-discovery and manual IP switcher.
+   - Synced lyrics viewer that automatically highlights and scrolls with current track playback.
+   - Tested and verified on device. APK output at `remote/build/app/outputs/flutter-apk/app-debug.apk`.
+
 ---
 
 ## Run commands

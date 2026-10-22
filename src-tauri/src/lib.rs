@@ -1,5 +1,6 @@
 mod audio_protocol;
 mod commands;
+pub mod remote_server;
 #[cfg(windows)]
 mod taskbar;
 
@@ -25,6 +26,11 @@ pub fn run() {
                     Err(e) => eprintln!("[noctra] no window handle for the taskbar: {e}"),
                 }
             }
+
+            if let Some(srv) = remote_server::start_server(app.handle().clone()) {
+                app.manage(srv);
+            }
+
             // The mini-player window is declared in tauri.conf.json (hidden) rather than built at
             // runtime: on Windows a runtime-built webview gets a WebView2 environment whose browser
             // args differ from the main window's, and it never finishes initialising (BUG-011).
@@ -63,7 +69,11 @@ pub fn run() {
             commands::scan::scan_folder,
             commands::scan::scan_paths,
             commands::scan::load_library,
-            commands::scan::save_library
+            commands::scan::save_library,
+            commands::remote_get_info,
+            commands::remote_update_state,
+            commands::remote_set_artwork_file,
+            commands::remote_update_lyrics
         ])
         .run(tauri::generate_context!())
         .expect("error while running Noctra");

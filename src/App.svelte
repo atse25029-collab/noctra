@@ -6,6 +6,7 @@
   import { engine } from "./services/audio/engine";
   import { registerPlaybackShortcuts } from "./services/audio/shortcuts";
   import { startMainBridge } from "./services/windowBridge";
+  import { startRemoteBridge } from "./services/remoteBridge";
   import {
     registerMediaSession,
     syncMediaMetadata,
@@ -161,6 +162,9 @@
 
   // Keep the floating mini-player card in sync with playback.
   $effect(() => startMainBridge());
+
+  // Keep the mobile remote control server in sync with playback and commands.
+  $effect(() => startRemoteBridge());
 
   // Fetch lyrics as soon as the track changes, from here rather than from the lyrics view. The card
   // and the Now Playing panel both need them, and if the request only started when the fullscreen

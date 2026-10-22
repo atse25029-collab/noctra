@@ -417,3 +417,59 @@ pub fn read_tags(path: String) -> Result<AudioInfo, String> {
         album,
     })
 }
+
+#[derive(Serialize)]
+pub struct RemoteInfo {
+    pub ip: Option<String>,
+    pub port: u16,
+}
+
+#[tauri::command]
+pub fn remote_get_info() -> RemoteInfo {
+    RemoteInfo {
+        ip: crate::remote_server::get_local_ip(),
+        port: crate::remote_server::HTTP_PORT,
+    }
+}
+
+#[tauri::command]
+pub fn remote_update_state(
+    handle: tauri::State<crate::remote_server::RemoteServerHandle>,
+    update: crate::remote_server::StateUpdatePayload,
+) {
+    handle.update_state(update);
+}
+
+#[tauri::command]
+pub fn remote_set_artwork_file(
+    handle: tauri::State<crate::remote_server::RemoteServerHandle>,
+    path: String,
+) -> Result<bool, String> {
+    let tagged = Probe::open(&path)
+        .map_err(|e| format!("could not open: {e}"))?
+        .read()
+        .map_err(|e| format!("could not parse: {e}"))?;
+
+    for tag in tagged.tags() {
+        for pic in tag.pictures() {
+            let mime = pic
+                .mime_type()
+                .map(|m| m.as_str())
+                .unwrap_or("image/jpeg")
+                .to_string();
+            handle.update_artwork(mime, pic.data().to_vec());
+            return Ok(true);
+        }
+    }
+    handle.clear_artwork();
+    Ok(false)
+}
+
+#[tauri::command]
+pub fn remote_update_lyrics(
+    handle: tauri::State<crate::remote_server::RemoteServerHandle>,
+    lyrics_json: Option<String>,
+) {
+    handle.update_lyrics(lyrics_json);
+}
+

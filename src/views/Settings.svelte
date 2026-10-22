@@ -15,9 +15,19 @@
   import { openExternal } from "../services/shell";
   import { settings, type LaunchAction, type RepeatMode } from "../stores/settings.svelte";
   import { leadArtist } from "../data/track";
+  import { getRemoteServerInfo } from "../services/remoteBridge";
 
   let rustVersion = $state("querying…");
   let rustError = $state("");
+  let remoteIp = $state("");
+
+  $effect(() => {
+    void getRemoteServerInfo()
+      .then((info) => {
+        remoteIp = info.ip ?? "";
+      })
+      .catch(() => {});
+  });
 
   /** The version arrives from Rust as "noctra 0.1.0"; the signature shows the number alone. */
   const versionNumber = $derived(
@@ -355,6 +365,31 @@
         <button class="btn btn-sm" onclick={() => blocked.clear()}>Allow everything</button>
       </div>
     {/if}
+  </section>
+
+  <section class="card glass-panel">
+    <h2>Mobile Remote Control</h2>
+    <div class="row">
+      <span class="stack">
+        <span class="label">Server Status</span>
+        <span class="hint">Control Noctra from your Android phone on the same Wi-Fi. Auto-discovery is enabled.</span>
+      </span>
+      <span class="value" style="color: #22c55e;">● Active (Port 43821)</span>
+    </div>
+    <div class="row">
+      <span class="stack">
+        <span class="label">Local IP Address</span>
+        <span class="hint">Use this address in the Noctra Remote app or any mobile browser.</span>
+      </span>
+      <span class="value">{remoteIp ? `http://${remoteIp}:43821` : "Detecting…"}</span>
+    </div>
+    <div class="row">
+      <span class="stack">
+        <span class="label">Android Companion App</span>
+        <span class="hint">The Noctra Remote Flutter app is located in the <code>remote/</code> directory.</span>
+      </span>
+      <span class="value">v1.0.0</span>
+    </div>
   </section>
 
   <section class="card glass-panel">
